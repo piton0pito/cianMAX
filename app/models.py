@@ -7,8 +7,9 @@ from hashlib import sha256
 class User(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True, default=None)
     hash_password: str  # хэш пароля
-    role: str = Field(default='no_verify')  # роль пользователя super_user, moderate, user, BAN
-    email: str = Field()  # почта
+    role: str = Field(default='user')  # роль пользователя super_user, moderate, user, BAN
+    email: str   # почта
+    phone: str
     name: str  # имя
     date_reg: datetime = Field(default_factory=datetime.utcnow)  # дата регистрации
     temp_data: str = Field(nullable=True)
@@ -39,6 +40,7 @@ class Apartment(SQLModel, table=True):
     type: str
     m: int
     prise: int
+    data: datetime = Field(default_factory=datetime.utcnow)
     description: str
 
     def edit_description(self, description):
@@ -51,18 +53,36 @@ class Apartment(SQLModel, table=True):
         self.status = 'active'
 
 
-class Reviews(SQLModel, tadle=True):
+class Review(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True, default=None)
+    apartment_id: int = Field(foreign_key='apartment.id')
     user_id: int = Field(foreign_key='user.id')
-    stars: int = Field(ge=0, le=5)
+    user_name: str = Field(default='Anonim')
+    stars: int = Field(gt=0, le=5)
     description: str
+    data: datetime = Field(default_factory=datetime.utcnow)
+    red: bool = Field(default=False)
 
     def edit_description(self, description):
         self.description = description
+        self.red = True
+
+    def set_name(self, name):
+        self.user_name = name
 
 
-class Messages(SQLModel, table=True):
+class Message(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True, default=None)
     create_user_id: int = Field(foreign_key='user.id')
     recipient_user_id: int
+    create_user_email: str = Field(foreign_key='user.email')
+    create_user_phone: str = Field(nullable=True)
     description: str
+    red: bool = Field(default=False)
+
+    def set_phone(self, phone):
+        self.create_user_phone = phone
+
+    def edit_description(self, description):
+        self.description = description
+        self.red = True

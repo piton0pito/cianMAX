@@ -1,10 +1,10 @@
-from fastapi import APIRouter, HTTPException, Response, Depends
+from fastapi import APIRouter, HTTPException, Response, Depends, UploadFile
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from pydantic import json
 from sqlmodel import Session, select
 
 from app.db import get_session
-from app.models import User
+from app.models import User, Apartment
 from app.schemas import UserCreate, UserUpdate, Email, GetUser, CreateNewPassword
 from app.utils import create_access_token, hash_password, verify_access_token, gen_res_key, send_mail
 
@@ -41,9 +41,11 @@ def reg_user(user: UserCreate,
         raise HTTPException(status_code=401, detail='Incorrect password')
     hashed_password = hash_password(user.password)
     db_user = User(email=user.email,
+                   phone=user.phone,
                    hash_password=hashed_password,
                    name=user.name,
                    )
+    # print(db_user)
     session.add(db_user)
     session.commit()
     raise HTTPException(status_code=201)
@@ -117,6 +119,8 @@ def create_new_password(data: CreateNewPassword, session: Session = Depends(get_
 
 
 @router.get('/me/')
-def user_me(temp_user: User = Depends(verify_access_token)):
+def user_me(temp_user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
     user = GetUser(email=temp_user.email, name=temp_user.name)
-    return user
+    apartments = session.exec(select(Apartment).where(Apartment.user_id == temp_user.id)).all()
+    return user, apartments
+
