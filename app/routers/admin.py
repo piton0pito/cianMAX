@@ -75,7 +75,7 @@ def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token
         raise HTTPException(status_code=404, detail='User not found')
     if user.role != 'BAN':
         raise HTTPException(status_code=400, detail='The user is not blocked')
-    user.un_ban_user()
+    user.user_user()
     session.add(user)
     session.commit()
     session.refresh(user)
@@ -123,17 +123,54 @@ def get_no_verify_user(user_id: int, su_user: User = Depends(verify_access_token
         raise HTTPException(status_code=404, detail='User not found')
     if user.role != 'super_user':
         raise HTTPException(status_code=400, detail='The user is not a super user')
-    user.un_super_user()
+    user.user_user()
     session.add(user)
     session.commit()
     session.refresh(user)
     raise HTTPException(status_code=200)
 
 
-@router.get('/get_all_apartment/')
-def get_all_cars(session: Session = Depends(get_session), su_user: User = Depends(verify_access_token)):
+# @router.get('/get_all_apartment/')
+# def get_all_cars(session: Session = Depends(get_session), su_user: User = Depends(verify_access_token)):
+#     if su_user.role != 'super_user':
+#         raise HTTPException(status_code=403)
+#     return session.exec(select(Apartment)).all()
+
+
+@router.delete('/del_apartment/{apartment_id}')
+def del_apartment(apartment_id: int, su_user: User = Depends(verify_access_token),
+                  session: Session = Depends(get_session)):
     if su_user.role != 'super_user':
         raise HTTPException(status_code=403)
-    return session.exec(select(Apartment)).all()
+    apartment = session.exec(select(Apartment).where(Apartment.id == apartment_id)).first()
+    if not apartment:
+        raise HTTPException(status_code=404)
+    session.delete(apartment)
+    session.commit()
+    raise HTTPException(status_code=200)
 
 
+@router.delete('/del_review/{review_id}')
+def del_review(review_id: int, su_user: User = Depends(verify_access_token),
+               session: Session = Depends(get_session)):
+    if su_user.role != 'super_user':
+        raise HTTPException(status_code=403)
+    apartment = session.exec(select(Apartment).where(Apartment.id == review_id)).first()
+    if not apartment:
+        raise HTTPException(status_code=404)
+    session.delete(apartment)
+    session.commit()
+    raise HTTPException(status_code=200)
+
+
+@router.delete('/del_review/{message_id}')
+def del_review(message_id: int, su_user: User = Depends(verify_access_token),
+               session: Session = Depends(get_session)):
+    if su_user.role != 'super_user':
+        raise HTTPException(status_code=403)
+    apartment = session.exec(select(Apartment).where(Apartment.id == message_id)).first()
+    if not apartment:
+        raise HTTPException(status_code=404)
+    session.delete(apartment)
+    session.commit()
+    raise HTTPException(status_code=200)

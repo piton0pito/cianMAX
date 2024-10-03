@@ -7,7 +7,7 @@ from hashlib import sha256
 class User(SQLModel, table=True):
     id: Optional[int] = Field(primary_key=True, default=None)
     hash_password: str  # хэш пароля
-    role: str = Field(default='user')  # роль пользователя super_user, moderate, user, BAN
+    role: str = Field(default='user')  # роль пользователя super_user, user, BAN
     email: str   # почта
     phone: str
     name: str  # имя
@@ -16,9 +16,6 @@ class User(SQLModel, table=True):
 
     def verify_password(self, password):
         return self.hash_password == sha256(password.encode()).hexdigest()
-
-    def moderate_user(self):
-        self.role = 'moderate'
 
     def ban_user(self):
         self.role = 'BAN'
