@@ -94,8 +94,7 @@ async def get_meme():
 
 def gen_res_key():
     num = str(randint(1, 999999))
-    num = hash_password(('0' * (6 - len(num))) + num)
-    return num
+    return ('0' * (6 - len(num))) + num
 
 
 def get_delta_time(date_1: datetime, date_2: datetime):

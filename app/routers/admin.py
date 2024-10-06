@@ -19,10 +19,8 @@ def create_admin(session: Session = Depends(get_session)):
     hash_pass = hash_password(PASS_ADMIN)
     user = User(email=EMAIL_ADMIN,
                 hash_password=hash_pass,
-                first_name='admin',
-                last_name='admin',
-                surname='admin',
-                license='0000000000',
+                name='admin',
+                phone='+78005553535',
                 )
     user.super_user()
     session.add(user)
@@ -43,9 +41,9 @@ def get_verify_user(user: User = Depends(verify_access_token), session: Session 
     if user.role != 'super_user':
         raise HTTPException(status_code=403)
     name = 'users'
-    users = session.exec(select(User).where(User.role == 'verify')).all()
+    users = session.exec(select(User)).all()
     get_xlsx(users, f'{name}.xlsx')
-    return FileResponse(path=f'media_data/{name}.xlsx', filename=f'{name}.xlsx', media_type='multipart/form-data')
+    return FileResponse(path=f'{name}.xlsx', filename=f'{name}.xlsx', media_type='multipart/form-data')
 
 
 @router.put('/BAN_user/{user_id}')

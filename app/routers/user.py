@@ -100,8 +100,9 @@ def reset_password(email: Email, session: Session = Depends(get_session)):
         raise HTTPException(status_code=401, detail='Incorrect email')
     code = gen_res_key()
     send_mail(temp_user.email, code)
-    # print(code)
-    temp_user.sqlmodel_update({'temp_data': code})
+    print(code)
+    hash_code = hash_password(code)
+    temp_user.sqlmodel_update({'temp_data': hash_code})
     session.add(temp_user)
     session.commit()
     session.refresh(temp_user)
@@ -131,7 +132,11 @@ def user_me(temp_user: User = Depends(verify_access_token), session: Session = D
     user = GetUser(email=temp_user.email, name=temp_user.name)
     apartments = session.exec(select(Apartment).where(Apartment.user_id == temp_user.id)).all()
     # avatar = session.exec(select(Avatar).where(Avatar.user_id == temp_user.id)).first()
-    return user, apartments
+    output = {
+        'user': user,
+        'apartment': apartments
+    }
+    return output
 
 
 @router.get('/my_avatar/')
