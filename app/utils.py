@@ -1,14 +1,18 @@
+import os
 import urllib
+import uuid
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
+from typing import List
 
 import openpyxl
+from PIL.Image import Image
 
 from app.config import HOST, USERNAME, PASSWORD, PORT
 
 from random import randint
-from fastapi import Depends
+from fastapi import Depends, UploadFile
 
 from fastapi import HTTPException
 from datetime import datetime, timedelta
@@ -90,7 +94,8 @@ async def get_meme():
 
 def gen_res_key():
     num = str(randint(1, 999999))
-    return ('0' * (6 - len(num))) + num
+    num = hash_password(('0' * (6 - len(num))) + num)
+    return num
 
 
 def get_delta_time(date_1: datetime, date_2: datetime):
@@ -113,3 +118,37 @@ def get_xlsx(users, file_name):
         sheet.append(row)
     # Save the workbook
     workbook.save(file_name)
+
+
+async def process_images(images: list[UploadFile], target_dir: str, target_name: str) -> list[str]:
+    saved_images = []
+    for i, image in enumerate(images):
+        # Check if the image is a JPEG
+        if image.content_type != 'image/jpeg':
+            raise ValueError(f"Image {image.filename} is not a JPEG")
+
+        # Check if the image size is not more than 5MB
+        if image.size > 5 * 1024 * 1024:
+            raise ValueError(f"Image {image.filename} is too large (max 5MB)")
+
+        # Generate a unique filename
+        filename = f"{target_name}_{i}.jpg"
+
+        # Save the image to the target directory
+        image_path = os.path.join(target_dir, filename)
+        with open(image_path, 'wb') as f:
+            f.write(await image.read())
+
+        saved_images.append(image_path)
+
+    return saved_images
+
+
+async def get_image_paths(apartment_id: int) -> List[str]:
+    directory = '../media'
+    images_path = []
+    for filename in os.listdir(directory):
+        if filename.startswith(f"{apartment_id}_") and filename.endswith(".jpg"):
+            foto_id = filename.split("_")[1].split(".")[0]
+            images_path.append(os.path.join(directory, filename))
+    return images_path

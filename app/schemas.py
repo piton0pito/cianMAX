@@ -1,6 +1,10 @@
+from typing import List
+
 from pydantic import BaseModel, Field, EmailStr
 from datetime import datetime
 from pydantic_extra_types.phone_numbers import PhoneNumber
+
+from app.models import User, Apartment
 
 
 class UserCreate(BaseModel):
@@ -45,6 +49,8 @@ class GetApartment(BaseModel):
     before_m: int = Field(default=-1, description='before_m')
     from_prise: int = Field(default=-1, description='from_prise')
     before_prise: int = Field(default=-1, description='before_prise')
+    offset: int = Field(default=0, description='offset')
+    limit: int = Field(default=10, description='limit')
 
 
 class UpdateDescriptionApartment(BaseModel):
@@ -79,5 +85,12 @@ class UpdateMessage(BaseModel):
     description: str = Field(default='description')
 
 
+class UserResponse(BaseModel):
+    user: User
+    apartments: List[Apartment]
+    avatar_image: bytes
 
 
+class PhotoResponse(BaseModel):
+    id: int
+    data: bytes

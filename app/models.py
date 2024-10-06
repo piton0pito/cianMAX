@@ -1,3 +1,5 @@
+import json
+
 from sqlmodel import SQLModel, Field
 from typing import Optional
 from datetime import datetime
@@ -83,3 +85,18 @@ class Message(SQLModel, table=True):
     def edit_description(self, description):
         self.description = description
         self.red = True
+
+
+class Avatar(SQLModel, table=True):
+    id: Optional[int] = Field(primary_key=True, default=None)
+    user_id: int = Field(foreign_key='user.id')
+    image: bytes = Field(nullable=False)
+
+    def update_avatar(self, image: bytes):
+        self.image = image
+
+
+class PhotoApartment(SQLModel, table=True):
+    id: Optional[int] = Field(primary_key=True, default=None)
+    apartment_id: int = Field(foreign_key='apartment.id')
+    image: bytes = Field(nullable=False)

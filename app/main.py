@@ -8,7 +8,7 @@ from pathlib import Path
 from sqlmodel import create_engine
 
 from app.db import engine, get_session
-from app.routers import user, apartment, reviews, message
+from app.routers import user, apartment, reviews, message, test
 from sqlmodel import SQLModel, Session
 
 from app.utils import send_mail, get_meme
@@ -21,6 +21,7 @@ app.include_router(user.router)
 app.include_router(apartment.router)
 app.include_router(reviews.router)
 app.include_router(message.router)
+app.include_router(test.router)
 
 
 @app.get('/mem/')
