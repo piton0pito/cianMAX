@@ -1,0 +1,7 @@
+.venv
+.idea
+app/data_base.db
+app/meme.jpg
+app/users.xlsx
+Docker
+.gitlab-ci.yml

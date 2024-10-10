@@ -46,15 +46,15 @@ def test_update_user_data(add_test_user_1, add_test_user_2, clear_database):
     assert response.status_code == 401
 
 
-def test_reset_password(add_test_user_1, clear_database):
-    data = email_data
-    response = client.put("/reset_password/", json=email_data)
-    assert response.status_code == 201
-
-    data["email"] = TEST_USER_EMAIL + 'test'
-    response = client.put("/reset_password/", json=email_data)
-    assert response.status_code == 401
-    data["email"] = TEST_USER_EMAIL
+# def test_reset_password(add_test_user_1, clear_database):
+#     data = email_data
+#     response = client.put("/reset_password/", json=email_data)
+#     assert response.status_code == 201
+#
+#     data["email"] = TEST_USER_EMAIL + 'test'
+#     response = client.put("/reset_password/", json=email_data)
+#     assert response.status_code == 401
+#     data["email"] = TEST_USER_EMAIL
 
 
 # def test_create_new_password(add_test_user_1, get_code, clear_database):

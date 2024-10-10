@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from select import select
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.db import get_session
 from app.models import Apartment, Message, User
@@ -62,10 +61,10 @@ def delite_message(message_id: int, user: User = Depends(verify_access_token), s
 @router.get('/my_incoming_message/')
 def my_incoming_message(user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
     messages = session.exec(select(Message).where(Message.recipient_user_id == user.id)).all()
-    return messages
+    return {'messages': messages}
 
 
 @router.get('/my_outgoing_message/')
 def my_outgoing_message(user: User = Depends(verify_access_token), session: Session = Depends(get_session)):
     messages = session.exec(select(Message).where(Message.create_user_id == user.id)).all()
-    return messages
+    return {'messages': messages}

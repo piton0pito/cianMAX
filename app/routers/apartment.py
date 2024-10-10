@@ -6,7 +6,6 @@ from fastapi.responses import JSONResponse
 from sqlmodel import Session, select
 from datetime import datetime
 
-
 from app.db import get_session
 from app.models import Apartment, User, Message, PhotoApartment
 from app.schemas import GetApartment, AddApartment, UpdateDescriptionApartment, CreateMessage, UpdateMessage, \
@@ -46,7 +45,8 @@ def get_apartment_temp(data: GetApartment, session: Session = Depends(get_sessio
 @router.post('/get_apartment_data/{apartment_id}')
 async def get_apartment(apartment_id: int, session: Session = Depends(get_session)):
     apartment = session.exec(select(Apartment).where(Apartment.id == apartment_id)).first()
-
+    if not apartment:
+        raise HTTPException(status_code=404)
     return apartment
 
 
@@ -59,7 +59,7 @@ async def get_apartment(apartment_id: int, session: Session = Depends(get_sessio
     ids = []
     for photo in images:
         ids.append(photo.id)
-    return ids
+    return {'apartment_ids': ids}
 
 
 @router.get('/get_apartment_photo/{photo_id}')
@@ -71,7 +71,7 @@ async def get_apartment(photo_id: int, session: Session = Depends(get_session)):
 
 
 @router.post('/add_apartment/')
-async def add_apartment(data: AddApartment = Depends(), images: List[UploadFile] = File(...),
+async def add_apartment(data: AddApartment,  # images: List[UploadFile] = File(...),
                         session: Session = Depends(get_session), user: User = Depends(verify_access_token)):
     # Обработка запроса
     apartment = Apartment(
@@ -88,11 +88,11 @@ async def add_apartment(data: AddApartment = Depends(), images: List[UploadFile]
     session.commit()
 
     # Сохранение изображений в базу данных
-    for image in images:
-        image_data = await image.read()
-        image_instance = PhotoApartment(apartment_id=apartment.id, image=image_data)
-        session.add(image_instance)
-        session.commit()
+    # for image in images:
+    #     image_data = await image.read()
+    #     image_instance = PhotoApartment(apartment_id=apartment.id, image=image_data)
+    #     session.add(image_instance)
+    #     session.commit()
 
     return JSONResponse(content={"message": "Квартира добавлена"}, status_code=201)
 
@@ -105,11 +105,17 @@ async def add_apartment_images(apartment_id: int, images: List[UploadFile] = Fil
         raise HTTPException(status_code=404)
     if apartment.user_id != user.id:
         raise HTTPException(status_code=403)
-    await process_images(images, '../media', str(apartment.id))
+
+    # Сохранение изображений в базу данных
+    for image in images:
+        image_data = await image.read()
+        image_instance = PhotoApartment(apartment_id=apartment.id, image=image_data)
+        session.add(image_instance)
+        session.commit()
     return Response(status_code=200)
 
 
-@router.put('/update/{data.apartment_id}/')
+@router.put('/update_apartment/{data.apartment_id}/')
 def update_description_apartment(data: UpdateDescriptionApartment, session: Session = Depends(get_session),
                                  user: User = Depends(verify_access_token)):
     apartment = session.exec(select(Apartment).where(Apartment.id == data.apartments_id)).first()
@@ -124,7 +130,7 @@ def update_description_apartment(data: UpdateDescriptionApartment, session: Sess
     raise HTTPException(status_code=200)
 
 
-@router.put('/inactive/{apartment_id}')
+@router.put('/inactive_apartment/{apartment_id}')
 def inactive_apartment(apartment_id: int, user: User = Depends(verify_access_token),
                        session: Session = Depends(get_session)):
     apartment = session.exec(select(Apartment).where(Apartment.id == apartment_id)).first()

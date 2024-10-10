@@ -38,7 +38,7 @@ def schedule_mail(email: str, code: str, tasks: BackgroundTasks):
 @app.get("/random_meme")
 async def get_image():
     await get_meme()
-    image_path = Path("meme.jpg")  # Replace with the actual image path
+    image_path = Path("../test/meme.jpg")  # Replace with the actual image path
     return FileResponse(image_path, media_type="image/jpeg")
 
 

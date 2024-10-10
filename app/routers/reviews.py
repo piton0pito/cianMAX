@@ -14,13 +14,13 @@ router = APIRouter(tags=['reviews'],
 @router.get('/review/')
 def review(session: Session = Depends(get_session)):
     review = session.exec(select(Review)).all()
-    return review
+    return {'review': review}
 
 
 @router.get('/review/{apartment_id}')
 def review(apartment_id: int, session: Session = Depends(get_session)):
-    review = session.exec(select(Review).where(Review.id == apartment_id)).all()
-    return review
+    review = session.exec(select(Review).where(Review.apartment_id == apartment_id)).all()
+    return {'review': review}
 
 
 @router.post('/create_review/')
@@ -30,6 +30,8 @@ def create_review(data: CreateReview, user: User = Depends(verify_access_token),
         raise HTTPException(status_code=400)
     if session.exec(select(Review).where(Review.user_id == user.id).where(Review.apartment_id == data.apartment_id)).first():
         raise HTTPException(status_code=400, detail='You have review for this apartment')
+    if session.exec(select(Apartment).where(Apartment.user_id == user.id).where(Apartment.id == data.apartment_id)).first():
+        raise HTTPException(status_code=400, detail='Куда отзыв на свою квартиру? Накрутка плохо!!!')
     temp_review = Review(
         apartment_id=data.apartment_id,
         user_id=user.id,

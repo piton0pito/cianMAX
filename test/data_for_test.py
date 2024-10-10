@@ -29,3 +29,40 @@ create_new_password_data = {
 
 email_data = {"email": TEST_USER_EMAIL}
 
+get_apartment_data = {
+  "city": "None",
+  "type": "None",
+  "from_m": -1,
+  "before_m": -1,
+  "from_prise": -1,
+  "before_prise": -1,
+  "offset": 0,
+  "limit": 10
+}
+
+add_apartment_data = {
+  "city": "gg",
+  "address": "gg",
+  "type": "g",
+  "m": 52,
+  "prise": 52,
+  "description": "d"
+}
+
+update_description_data = {
+  "id": 0,
+  "description": "string"
+}
+
+review_data = {
+  "apartment_id": 0,
+  "stars": 2,
+  "description": "description",
+  "anonim": False
+}
+
+add_message_data = {
+  "apartment_id": 0,
+  "phone": True,
+  "description": "description"
+}
